@@ -1,0 +1,30 @@
+name: CI - Docker React Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # שלב 1: משוך את הקוד שלך מה־repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # שלב 2: התקן Docker CLI (מגיע כבר מותקן ברוב runners)
+      - name: Set up Docker
+        run: docker --version
+
+      # שלב 3: בנה את ה־image בעזרת Dockerfile.dev
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ github.actor }}/docker-react -f Dockerfile.dev .
+
+      # שלב 4: הרץ את הבדיקות
+      - name: Run tests
+        run: |
+          docker run -e CI=true ${{ github.actor }}/docker-react npm test
